@@ -1,50 +1,43 @@
 ---
 name: snowplow-tracking
-version: 1.0.0
-description: Expert guidance for implementing Snowplow Analytics tracking, from schema design to production deployment on web, server, and mobile applications.
-applies_when: |
-  - User asks about Snowplow tracking implementation, setup, or configuration
-  - Mentions event schemas, context schemas, or Iglu repositories
-  - Needs help with tracker initialization or instrumentation
-  - Questions about Snowplow migration or debugging
-  - Requests for tracking plan validation or testing strategies
-author: Patrick Bald (Snowplow Analytics)
+description: Expert guidance for implementing Snowplow Analytics tracking including schema design, tracker setup, event instrumentation, and debugging. Use when implementing Snowplow tracking, designing event or context schemas, configuring trackers (JavaScript, mobile, server-side), troubleshooting tracking issues, or migrating from other analytics platforms.
 ---
 
-# Snowplow Tracking Implementation Expert
+# Snowplow Analytics Implementation
 
-You are an expert in Snowplow Analytics implementation. This skill provides comprehensive guidance for implementing reliable, maintainable tracking across web, mobile, and server-side platforms.
+## Quick reference
 
-## Core Principles
+**Schema design** → Read [schemas/DESIGN.md](schemas/DESIGN.md)
+**JavaScript tracker** → Read [trackers/JAVASCRIPT.md](trackers/JAVASCRIPT.md)
+**Mobile trackers** → Read [trackers/MOBILE.md](trackers/MOBILE.md)
+**Server-side** → Read [trackers/SERVER_SIDE.md](trackers/SERVER_SIDE.md)
+**Testing** → Read [testing/VALIDATION.md](testing/VALIDATION.md)
+**Migrations** → Read [migration/GUIDE.md](migration/GUIDE.md)
+**Debugging** → Read [troubleshooting/DEBUG.md](troubleshooting/DEBUG.md)
 
-When helping with Snowplow tracking:
+## Core principles
 
-1. **Schema-first design**: Always define schemas before implementing tracking
-2. **Consistent naming**: Follow semantic event naming (object_action pattern)
-3. **Context enrichment**: Identify which contexts add value for each event
-4. **Validation layers**: Implement validation at multiple stages
-5. **Testing strategy**: Unit tests, integration tests, and production monitoring
+1. **Schema-first**: Define schemas before implementing tracking
+2. **Consistent naming**: Use object_action pattern (e.g., `product_viewed`, `form_submitted`)
+3. **Context enrichment**: Attach relevant contexts to events
+4. **Validation at every stage**: Schema validation, dev testing, production monitoring
+5. **Test before production**: Use `scripts/test_event.py` to validate events
 
-## When to Load Additional Resources
+## Standard workflow
 
-Based on the user's request, read the appropriate supplemental files:
+1. Design event and context schemas
+2. Validate schemas: `python scripts/validate_schema.py schema.json`
+3. Register schemas in Iglu repository
+4. Implement tracking code
+5. Test in development
+6. Monitor in production
 
-- **Schema design questions** → Read `schemas/SCHEMA_DESIGN.md`
-- **Web tracker implementation** → Read `trackers/JAVASCRIPT_TRACKER.md`
-- **Mobile tracking** → Read `trackers/MOBILE_TRACKERS.md`
-- **Server-side tracking** → Read `trackers/SERVER_SIDE.md`
-- **Testing and validation** → Read `testing/VALIDATION.md`
-- **Migration from other platforms** → Read `migration/MIGRATION_GUIDE.md`
-- **Debugging issues** → Read `troubleshooting/DEBUG_GUIDE.md`
-- **First-party tracking setup** → Read `advanced/FIRST_PARTY.md`
+## Schema templates
 
-## Quick Reference
-
-### Event Schema Template
+### Event schema
 ```json
 {
   "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
-  "description": "Schema for [event description]",
   "self": {
     "vendor": "com.yourcompany",
     "name": "event_name",
@@ -53,107 +46,116 @@ Based on the user's request, read the appropriate supplemental files:
   },
   "type": "object",
   "properties": {
-    // Define properties here
+    "property_name": {
+      "type": "string",
+      "description": "Clear description",
+      "maxLength": 500
+    }
   },
-  "required": [],
+  "required": ["property_name"],
   "additionalProperties": false
 }
 ```
 
-### Context Schema Template
-```json
-{
-  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
-  "description": "Schema for [context description]",
-  "self": {
-    "vendor": "com.yourcompany",
-    "name": "context_name",
-    "format": "jsonschema",
-    "version": "1-0-0"
-  },
-  "type": "object",
-  "properties": {
-    // Define properties here
-  },
-  "required": [],
-  "additionalProperties": false
-}
+### Context schema
+Same structure as event schema, but describes reusable entity properties.
+
+## JavaScript tracker basics
+```javascript
+import { newTracker, trackSelfDescribingEvent } from '@snowplow/browser-tracker';
+
+newTracker('sp', 'collector.yourcompany.com', {
+  appId: 'your-app',
+  contexts: { webPage: true, session: true }
+});
+
+trackSelfDescribingEvent({
+  event: {
+    schema: 'iglu:com.yourcompany/event_name/jsonschema/1-0-0',
+    data: { /* your event properties */ }
+  }
+});
 ```
 
-## Common Patterns
+For complete setup and patterns, read [trackers/JAVASCRIPT.md](trackers/JAVASCRIPT.md).
 
-### Standard Event Implementation Flow
-1. Define business requirements
-2. Design and validate schemas
-3. Register schemas in Iglu
-4. Implement tracking code
-5. Validate in development
-6. Test in staging
-7. Monitor in production
+## Helper scripts
 
-### Tracker Initialization Checklist
-- [ ] Configure collector endpoint
-- [ ] Set app ID
-- [ ] Configure session context
-- [ ] Set up user identification
-- [ ] Enable relevant contexts
-- [ ] Configure buffer/batch settings
-- [ ] Implement error handling
+All scripts are in `scripts/` directory:
 
-## Available Helper Scripts
-
-This skill includes Python scripts you can execute:
-
-- `scripts/validate_schema.py`: Validate JSON schema syntax and Snowplow conventions
-- `scripts/generate_tracker_code.py`: Generate tracker implementation from schemas
-- `scripts/test_event.py`: Send test events to a collector
-- `scripts/schema_versioning.py`: Help with schema evolution decisions
-
-To use a script, read it first to understand parameters, then execute with appropriate arguments.
+**validate_schema.py**: Validate JSON schema syntax and Snowplow conventions
+```bash
+python scripts/validate_schema.py your_schema.json
 ```
 
-### Supporting Files Structure
+**test_event.py**: Send test event to collector
+```bash
+python scripts/test_event.py --collector your-collector.com --schema iglu:com.company/event/jsonschema/1-0-0 --data '{"key":"value"}'
 ```
-snowplow-tracking/
-├── SKILL.md
-├── schemas/
-│   ├── SCHEMA_DESIGN.md
-│   ├── versioning_guide.md
-│   └── examples/
-│       ├── ecommerce_events.json
-│       ├── user_contexts.json
-│       └── product_contexts.json
-├── trackers/
-│   ├── JAVASCRIPT_TRACKER.md
-│   ├── MOBILE_TRACKERS.md
-│   ├── SERVER_SIDE.md
-│   └── examples/
-│       ├── javascript_init.js
-│       ├── react_tracking.jsx
-│       ├── android_example.kt
-│       └── ios_example.swift
-├── testing/
-│   ├── VALIDATION.md
-│   ├── test_strategies.md
-│   └── examples/
-│       ├── jest_tests.js
-│       └── cypress_tracking.js
-├── migration/
-│   ├── MIGRATION_GUIDE.md
-│   ├── segment_to_snowplow.md
-│   ├── ga_to_snowplow.md
-│   └── mapping_templates/
-├── troubleshooting/
-│   ├── DEBUG_GUIDE.md
-│   ├── common_issues.md
-│   └── collector_testing.md
-├── advanced/
-│   ├── FIRST_PARTY.md
-│   ├── gtm_server_side.md
-│   ├── custom_contexts.md
-│   └── gdpr_compliance.md
-└── scripts/
-    ├── validate_schema.py
-    ├── generate_tracker_code.py
-    ├── test_event.py
-    └── schema_versioning.py
+
+**generate_tracker_code.py**: Generate tracker implementation from schema
+```bash
+python scripts/generate_tracker_code.py schema.json --language javascript
+```
+
+## Common patterns
+
+### E-commerce tracking
+```javascript
+// Product viewed
+trackSelfDescribingEvent({
+  event: {
+    schema: 'iglu:com.company/product_viewed/jsonschema/1-0-0',
+    data: {
+      product_id: 'PROD-123',
+      price: 99.99,
+      currency: 'USD'
+    }
+  }
+});
+```
+
+### Form tracking
+```javascript
+// Form submitted
+trackSelfDescribingEvent({
+  event: {
+    schema: 'iglu:com.company/form_submitted/jsonschema/1-0-0',
+    data: {
+      form_id: 'signup-form',
+      fields_completed: 5,
+      time_to_complete_seconds: 45
+    }
+  }
+});
+```
+
+## Schema versioning
+
+Version format: `MODEL-REVISION-ADDITION`
+
+- **MODEL (1-x-x)**: Breaking changes
+- **REVISION (x-1-x)**: Add optional fields
+- **ADDITION (x-x-1)**: Documentation only
+
+### Breaking changes (bump MODEL)
+- Remove required fields
+- Change field types
+- Make optional fields required
+- Stricter validation
+
+### Non-breaking changes (bump REVISION)
+- Add optional fields
+- Make required fields optional
+- Loosen validation
+
+## Debugging checklist
+
+1. Check collector endpoint is reachable
+2. Verify schema is registered in Iglu
+3. Validate event structure matches schema
+4. Check browser console for tracker errors
+5. Use Snowplow Inspector browser extension
+6. Review collector logs
+
+For detailed debugging, read [troubleshooting/DEBUG.md](troubleshooting/DEBUG.md).
