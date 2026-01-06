@@ -63,24 +63,6 @@ Comprehensive guidance for implementing Snowplow dbt data models and packages.
 - Configuration patterns for all major warehouses
 - Performance tuning strategies
 
-## Installation
-
-### Using Skills in Claude Desktop
-
-1. Download the `.skill` files from this repository
-2. Open Claude Desktop
-3. Go to Settings → Skills
-4. Click "Add Skill" and select the downloaded `.skill` file
-5. The skill will now be available to Claude in all conversations
-
-### Using Skills in Claude.ai
-
-Skills are automatically available when uploaded to your organization's Skills library.
-
-### Using Skills in Custom Applications
-
-If you're building custom applications with Claude, you can reference these skills in your system prompts or provide them as context.
-
 ## Usage Examples
 
 ### Schema Design
@@ -127,73 +109,6 @@ snowplow-dbt-modeling/
 └── references/
     └── unified_package.md            # Complete config reference
 ```
-
-## Best Practices
-
-### When to Use Multiple Skills
-
-Claude can use multiple skills simultaneously. For example:
-
-```
-User: I need to design schemas for tracking video engagement and then 
-model that data in dbt.
-
-Claude: [Uses both snowplow-schema-design and snowplow-dbt-modeling]
-Let me help you with both the schema design and dbt modeling...
-```
-
-### Skill Triggering
-
-Skills are automatically triggered based on:
-- Keywords in your questions (schema, entity, dbt, modeling)
-- Context of the conversation
-- Task requirements
-
-You don't need to explicitly request a skill - Claude will use the most relevant ones automatically.
-
-## Contributing
-
-We welcome contributions! To add or improve skills:
-
-1. Fork this repository
-2. Create a new branch for your changes
-3. Follow the existing skill structure
-4. Submit a pull request with a clear description
-
-### Creating New Skills
-
-To create a new Snowplow skill:
-
-1. Use the skill initialization script:
-```bash
-python init_skill.py <skill-name> --path ./
-```
-
-2. Edit `SKILL.md` with your content
-3. Add supporting resources (scripts, references)
-4. Validate and package:
-```bash
-python package_skill.py <skill-name> ./output
-```
-
-## Skill Maintenance
-
-### Updating Skills
-
-When Snowplow releases new features or best practices change:
-
-1. Update the relevant `SKILL.md` file
-2. Update version references
-3. Add new examples if applicable
-4. Re-package the skill
-5. Update this README if needed
-
-### Version Compatibility
-
-| Skill | Snowplow Version | Last Updated |
-|-------|-----------------|--------------|
-| snowplow-schema-design | All versions | 2025-01-06 |
-| snowplow-dbt-modeling | dbt-snowplow-unified v1.0+ | 2025-01-06 |
 
 ## Resources
 
